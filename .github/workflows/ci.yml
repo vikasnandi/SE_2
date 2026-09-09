@@ -1,4 +1,6 @@
-name: CI/CD Pipeline
+
+---
+name: CI/CD pipeline
 
 on:
   push:
@@ -10,47 +12,144 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+
     steps:
-      # steps go here
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
 
   test:
     needs: build
     runs-on: ubuntu-latest
+
     steps:
-      # steps go here
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest tests/ -v
 
 
   coverage:
     needs: test
     runs-on: ubuntu-latest
+
     steps:
-      # steps go here
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run coverage
+        run: pytest tests/ --cov=src --cov-report=html
 
 
   lint:
     needs: coverage
     runs-on: ubuntu-latest
+
     steps:
-      # steps go here
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run pylint
+        run: pylint src/ --disable=fixme
 
 
   format:
     needs: lint
     runs-on: ubuntu-latest
+
     steps:
-      # steps go here
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check formatting
+        run: black src/ tests/ --check
 
 
   security:
     needs: format
     runs-on: ubuntu-latest
+
     steps:
-      # steps go here
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run security scan
+        run: bandit -r src/
 
 
   deploy:
     needs: security
     runs-on: ubuntu-latest
+
     steps:
-      # steps go here
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Compile Python files
+        run: python -m compileall -b -f src
+
+      - name: Package project
+        run: zip -r deployment-package.zip src README.md requirements.txt
+
+      - name: Upload deployment package
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-zip
+          path: deployment-package.zip
